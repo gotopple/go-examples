@@ -147,8 +147,8 @@ aws ssm put-parameter \
 #### Build and run the service
 
 ```sh
-go get github.com/gotopple/go-examples/go-modern-aws
-$GOPATH/bin/go-modern-aws -config-path /topple-example/component/2018-08-25.1/
+go get github.com/gotopple/go-examples/go-service-config-with-ssm
+$GOPATH/bin/go-service-config-with-ssm -config-path /topple-example/component/2018-08-25.1/
 ```
 
 #### Exercise the service
