@@ -89,7 +89,7 @@ func main() {
 		}
 
 		// Seal the plaintext
-		ciphertext := aesgcm.Seal(nil, nonce, plaintext.Bytes(), nil)
+		ciphertext := aesgcm.Seal(nil, nonce, plaintext.Bytes(), []byte(authMetadata))
 
 		// Everything worked, form the envelope and return it to the caller.
 		fmt.Fprintf(w, "%x:%x", ciphertext, nonce)
@@ -148,7 +148,7 @@ func main() {
 		}
 
 		// Decrypt, verify, and authenticate the envelope.
-		plaintext, err := aesgcm.Open(nil, nonce, ciphertext, authMetadata)
+		plaintext, err := aesgcm.Open(nil, nonce, ciphertext, []byte(authMetadata))
 		// If the ciphertext was encrypted by a different key, or the nonce is 
 		// incorrect for the encrypted data, or the envelope fails the 
 		// authentication check. The input is bad.
