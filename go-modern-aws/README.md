@@ -18,9 +18,9 @@ SSM parameters provide a simple key-value store that is built directly into the 
 
 ### SSM Parameter Hierarchies for Configuration Collections
 
-SSM parameters should be organized into hierarchies to reflect your organization, deployment stage, project component architecture, and to model multi-parameter versioning. That organization is provided by file system tree-like paths. Consider the following example:
+SSM parameters should be organized into hierarchies that reflect the organization, deployment stage, project component architecture, and collections of parameters that should be versioned together. That organization is provided by file system tree-like paths. Consider the following example:
 
-Suppose your team (my-team) uses three deployment stages named: `development`, `stging`, and `production`. Further your team is working on a service named, `example-service` and that service requires two string configuration values, `favoriteColor` and `locale` as well as a secret key called `secretKey` that should always be stored encrypted.  Then you might store configuration for that service in a hierarchy like the following:
+Suppose your team (my-team) uses three deployment stages named: `development`, `staging`, and `production`. Further your team is working on a service named, `example-service` and that service requires two string configuration values, `favoriteColor` and `locale` as well as a secret key called `secretKey` that should always be stored encrypted.  Then you might store configuration for that service in a hierarchy like the following:
 
 ```
 /my-team
