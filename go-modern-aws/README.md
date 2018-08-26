@@ -16,6 +16,8 @@ The enclosed application demonstrates the use of SSM parameters for retrieving s
 
 SSM parameters provide a simple key-value store that is built directly into the AWS API layer. This makes SSM parameters first-class resources in AWS. There is no need to create a separate DynamoDB table or other data management resource. There is no need to write custom code to work with some custom storage solution. Because they are first-class resources, SSM parameters can be referenced directly from many other AWS services and resources like CloudFormation.
 
+### SSM Parameter Hierarchies for Configuration Collections
+
 SSM parameters should be orgnized into heirarchies to reflect your organization, deployment stage, project component architecture, and to model multi-parameter versioning. That organization is provided by file system tree-like paths. Consider the following example:
 
 Suppose your team (my-team) uses three deployment stages named: `development`, `stging`, and `production`. Further your team is working on a service named, `example-service` and that service requires two string configuration values, `favoriteColor` and `locale` as well as a secret key called `secretKey` that should always be stored encrypted.  Then you might store configuration for that service in a hierarchy like the following:
@@ -91,6 +93,16 @@ Parameter names do have some constraints documented [here](https://docs.aws.amaz
 * Parameter names can include only the following symbols and letters: a-zA-Z0-9\_.-/
 * A parameter name can't include spaces.
 * Parameter hierarchies are limited to a maximum depth of fifteen levels.
+
+### Secrets in Configuration
+
+Each SSM parameter has an associated data type. The type can be `String`, `StringList`, or `SecureString`. SSM will use KMS to encrypt and decrypt any parameters with the `SecureString` type. SSM will attempt to use the default KMS key for the account the calling IAM actor is associated with. The example in this project will always use the default key. However, your implementation can use other KMS keys by referencing the key ID when creating and retrieving the parameter data from SSM.
+
+### Secret Handling Best Practices
+
+Secrets should never be written to disk in plaintext. The example included in this repo loads configuration directly from SSM when it starts and never writes that configuration to disk. Other configuration management systems or tooling might use a database to store configuration working sets. Then later realize that configuration before runtime by writing files into a file in an EC2 instance, or into EC2 instance metadata (user data), or by baking it into an AMI or Docker image so that it is available to the software at launch. Those are all bad patterns for any system that handles sensitive and secret data. Strategies that ship configuration data with software deployment artifacts leak that data as those distribution channels often apply very course access control mechanisms. Strategies that stage files on and instance or make the data available via EC2 metadata risk leaking secrets to unauthorized processes on the same machine or to other non-root users. 
+
+By keeping secret material plaintext limited to the process memory you can be certain that the only way to expose the secret is by an attacker breaching the memory access boundaries provided by the operating system on the machine. Those attacks are possible in some cases, however they do require a more sophisticated attacker.
 
 ### Configuration Access Control
 
