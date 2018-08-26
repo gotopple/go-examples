@@ -1,6 +1,56 @@
 # go-modern-aws
 
-This example program demonstrates loading configuration and secret material from AWS Simple Service Manager.
+This example program demonstrates loading configuration and secret material from AWS Simple Service Manager (SSM).
+
+## On Modern Configuration and Secret Management in AWS
+
+The enclosed application demonstrates the use of SSM parameters for retrieving secret and other sensitive application cofiguration.  SSM is an ideal application configuration storage and last mile delivery solution. It provides:
+
+* First-class API management of key-value data
+* Support for both clear String and SecureString types where data is protected transparently by AWS Key Management Service
+* Tree-like namespace support
+* Parameter versioning
+* Auditable history
+* Integration with standard actor authentication and access control tooling (IAM)
+
+
+```
+/my-team/mystage/2018-08-25.1
+ ├ development
+ │ └ 2018-08-29.1
+ │   ├ secretKey
+ │   ├ favoriteColor
+ │   └ preferences
+ │     └ locale
+ ├ staging
+ │ ├ 2018-08-25.2
+ │ │ ├ secretKey
+ │ │ ├ favoriteColor
+ │ │ └ preferences
+ │ │   └ locale
+ │ └ 2018-08-29.1
+ │   ├ secretKey
+ │   ├ favoriteColor
+ │   └ preferences
+ │     └ locale
+ └ production
+   ├ 2018-08-25.1
+   │ ├ secretKey
+   │ ├ favoriteColor
+   │ └ preferences
+   │   └ locale
+   ├ 2018-08-25.2
+   │ ├ secretKey
+   │ ├ favoriteColor
+   │ └ preferences
+   │   └ locale
+   └ 2018-08-29.1
+     ├ secretKey
+     ├ favoriteColor
+     └ preferences
+       └ locale
+```
+
 
 ## The Example Service
 
@@ -11,20 +61,20 @@ This example program demonstrates loading configuration and secret material from
 ```sh
 # Generate and write a secure AES256 key into a SecureString SSM parameter
 aws ssm put-parameter \
-  --name /topple-example/component/v1/secretKey \
+  --name /topple-example/component/2018-08-25.1/secretKey \
   --type SecureString \
   --overwrite \
   --value "$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)" 
 
 # Populate the remaining required parameters
 aws ssm put-parameter \
-  --name /topple-example/component/v1/favoriteColor \
+  --name /topple-example/component/2018-08-25.1/favoriteColor \
   --type String \
   --overwrite \
   --value Blue
 
 aws ssm put-parameter \
-  --name /topple-example/component/v1/preferences/locale \
+  --name /topple-example/component/2018-08-25.1/preferences/locale \
   --type String \
   --overwrite \
   --value EN_us 
@@ -34,7 +84,7 @@ aws ssm put-parameter \
 
 ```sh
 go build
-./go-modern-aws -config-path /topple-example/component/v1/
+./go-modern-aws -config-path /topple-example/component/2018-08-25.1/
 ```
 
 #### Exercise the service
@@ -50,16 +100,6 @@ curl -s --data "Hello SSM" http://localhost:8080/seal
 
 # and DIY unseal
 curl -s --data "<PASTE THE OUTPUT FROM THE SEAL COMMAND>" http://localhost:8080/unseal
-```
-
-## Configuration and Secret Management
-
-```
-/my-team/mystage/v1
- ├ secretKey
- ├ favoriteColor
- └ preferences
-   └ locale
 ```
 
 
