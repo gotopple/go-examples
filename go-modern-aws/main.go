@@ -233,7 +233,7 @@ func loadConfig() *config {
 		// retrieved configuration
 		cv, ok := rc[tv]
 		if !ok {
-			log.Printf("Parameter %s is not included in the retrievd configuration\n", tv)
+			log.Printf("Parameter %s is not included in the retrieved configuration\n", tv)
 			continue
 		}
 		// Verify that both the field and parameter are string types.
