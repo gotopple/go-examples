@@ -40,8 +40,16 @@ go build
 #### Exercise the service
 
 ```sh
-# One-liner call the service twice to seal the data, then unseal the envelope and return the original message
-curl --data "Hello SSM" http://localhost:8080/seal | curl -d @- http://localhost:8080/unseal
+# One-liner call the service twice to seal the data, 
+# then unseal the envelope and return the original message.
+curl --data "Hello SSM" http://localhost:8080/seal | \
+  curl -d @- http://localhost:8080/unseal
+
+# Or DIY seal
+curl --data "Hello SSM" http://localhost:8080/seal
+
+# and DIY unseal
+curl -d "<PASTE THE OUTPUT FROM THE SEAL COMMAND>" http://localhost:8080/unseal
 ```
 
 ## Configuration and Secret Management
