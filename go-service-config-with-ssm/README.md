@@ -1,4 +1,4 @@
-# go-modern-aws
+# go-service-config-with-ssm
 
 This example program demonstrates loading configuration and secret material from AWS Simple Service Manager (SSM).
 
