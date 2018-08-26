@@ -98,6 +98,8 @@ If a user (IAM actor like a user or another identity associated with some policy
 
 ## The Example Service
 
+This example is a simple AES256 encryption service that exposes two endpoints, `/seal` and `/unseal`. The `/seal` endpoint will encrypt the HTTP request body using an internal key and return the encrypted value in an envelope with the following shape: `<base64 ciphertext>:<base64 nonce>`. The `/unseal` endpoint will use an internal key to unseal the contents of an envelope provided in the HTTP request body. If the internal key is rotated (by changing the SSM SecureString parameter value and restarting the service) then the service will not be able to unseal envelopes created with the old configuration.
+
 ## Running the Example
 
 #### Initialize the configuration in SSM
