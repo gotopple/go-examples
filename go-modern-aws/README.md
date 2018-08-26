@@ -106,7 +106,7 @@ By keeping secret material plaintext limited to the process memory you can be ce
 
 ### Configuration Access Control
 
-If a user (IAM actor like a user or another identity associated with some policy) has access to a path, then the user can access all levels of that path. For example, if a user has permission to access path /a, then the user can also access /a/b. Even if a user has explicitly been denied access in IAM for parameter /a, they can still call the GetParametersByPath API action recursively and view /a/b.
+If a user (IAM actor like a user or another identity associated with some policy) has access to a path, then the user can access all levels at or below that path. For example, if a user has permission to access path /a, then the user can also access /a/b. Even if a user has explicitly been denied access in IAM for parameter /a, they can still call the GetParametersByPath API action recursively and view /a/b.
 
 ## The Example Service
 
