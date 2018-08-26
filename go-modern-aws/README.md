@@ -8,49 +8,93 @@ The enclosed application demonstrates the use of SSM parameters for retrieving s
 
 * First-class API management of key-value data
 * Support for both clear String and SecureString types where data is protected transparently by AWS Key Management Service
-* Tree-like namespace support
+* Tree-like namespace (path) support
 * Parameter versioning
 * Auditable history
 * Integration with standard actor authentication and access control tooling (IAM)
+* Regionalized isolation
 
+SSM parameters provide a simple key-value store that is built directly into the AWS API layer. This makes SSM parameters first-class resources in AWS. There is no need to create a separate DynamoDB table or other data management resource. There is no need to write custom code to work with some custom storage solution. Because they are first-class resources, SSM parameters can be referenced directly from many other AWS services and resources like CloudFormation.
+
+SSM parameters should be orgnized into heirarchies to reflect your organization, deployment stage, project component architecture, and to model multi-parameter versioning. That organization is provided by file system tree-like paths. Consider the following example:
+
+Suppose your team (my-team) uses three deployment stages named: `development`, `stging`, and `production`. Further your team is working on a service named, `example-service` and that service requires two string configuration values, `favoriteColor` and `locale` as well as a secret key called `secretKey` that should always be stored encrypted.  Then you might store configuration for that service in a hierarchy like the following:
 
 ```
-/my-team/mystage/2018-08-25.1
+/my-team
  ├ development
- │ └ 2018-08-29.1
- │   ├ secretKey
- │   ├ favoriteColor
- │   └ preferences
- │     └ locale
+ │ └ example-service
+ │   └ 2018-08-29.1
+ │     ├ secretKey
+ │     ├ favoriteColor
+ │     └ preferences
+ │       └ locale
  ├ staging
- │ ├ 2018-08-25.2
- │ │ ├ secretKey
- │ │ ├ favoriteColor
- │ │ └ preferences
- │ │   └ locale
- │ └ 2018-08-29.1
- │   ├ secretKey
- │   ├ favoriteColor
- │   └ preferences
- │     └ locale
+ │ └ example-service
+ │   ├ 2018-08-25.2
+ │   │ ├ secretKey
+ │   │ ├ favoriteColor
+ │   │ └ preferences
+ │   │   └ locale
+ │   └ 2018-08-29.1
+ │     ├ secretKey
+ │     ├ favoriteColor
+ │     └ preferences
+ │       └ locale
  └ production
-   ├ 2018-08-25.1
-   │ ├ secretKey
-   │ ├ favoriteColor
-   │ └ preferences
-   │   └ locale
-   ├ 2018-08-25.2
-   │ ├ secretKey
-   │ ├ favoriteColor
-   │ └ preferences
-   │   └ locale
-   └ 2018-08-29.1
-     ├ secretKey
-     ├ favoriteColor
-     └ preferences
-       └ locale
+   └ example-service
+     ├ 2018-08-25.1
+     │ ├ secretKey
+     │ ├ favoriteColor
+     │ └ preferences
+     │   └ locale
+     ├ 2018-08-25.2
+     │ ├ secretKey
+     │ ├ favoriteColor
+     │ └ preferences
+     │   └ locale
+     └ 2018-08-29.1
+       ├ secretKey
+       ├ favoriteColor
+       └ preferences
+         └ locale
 ```
 
+In this example multiple versions of the configuration are modeled in the path of individual keys. It uses a path pattern: `/<team>/<stage>/<service>/<version>/` to isolate whole collections of related parameters. The tree is realized in the name of individual parameters so the above tree is a flat set of parameters with the following key names:
+
+```
+/my-team/development/example-service/2018-08-29.1/secretKey
+/my-team/development/example-service/2018-08-29.1/favoriteColor
+/my-team/development/example-service/2018-08-29.1/preferences/locale
+/my-team/staging/example-service/2018-08-25.2/secretKey
+/my-team/staging/example-service/2018-08-25.2/favoriteColor
+/my-team/staging/example-service/2018-08-25.2/preferences/locale
+/my-team/staging/example-service/2018-08-29.1/secretKey
+/my-team/staging/example-service/2018-08-29.1/favoriteColor
+/my-team/staging/example-service/2018-08-29.1/preferences/locale
+/my-team/production/example-service/2018-08-25.1/secretKey
+/my-team/production/example-service/2018-08-25.1/favoriteColor
+/my-team/production/example-service/2018-08-25.1/preferences/locale
+/my-team/production/example-service/2018-08-25.2/secretKey
+/my-team/production/example-service/2018-08-25.2/favoriteColor
+/my-team/production/example-service/2018-08-25.2/preferences/locale
+/my-team/production/example-service/2018-08-29.1/secretKey
+/my-team/production/example-service/2018-08-29.1/favoriteColor
+/my-team/production/example-service/2018-08-29.1/preferences/locale
+```
+
+Parameter names do have some constraints documented [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-parameter-name-constraints.html) and summarized as follows:
+
+* Parameter names are case sensitive.
+* A parameter name must be unique within an AWS Region
+* A parameter name can't be prefixed with "aws" or "ssm" (case-insensitive).
+* Parameter names can include only the following symbols and letters: a-zA-Z0-9\_.-/
+* A parameter name can't include spaces.
+* Parameter hierarchies are limited to a maximum depth of fifteen levels.
+
+### Configuration Access Control
+
+If a user (IAM actor like a user or another identity associated with some policy) has access to a path, then the user can access all levels of that path. For example, if a user has permission to access path /a, then the user can also access /a/b. Even if a user has explicitly been denied access in IAM for parameter /a, they can still call the GetParametersByPath API action recursively and view /a/b.
 
 ## The Example Service
 
