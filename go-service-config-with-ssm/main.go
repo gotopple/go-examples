@@ -237,7 +237,9 @@ func loadConfig() *config {
 	rc := map[string]ssm.Parameter{}
 	// Create AWS client with infrastructure secret material.
 	// session.NewSession() uses the default AWS SDK credential chain.
-	sess := session.Must(session.NewSession())
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
 	svc := ssm.New(sess)
 	var po *ssm.GetParametersByPathOutput
 	pi := &ssm.GetParametersByPathInput{

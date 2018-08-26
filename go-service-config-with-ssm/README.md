@@ -146,6 +146,8 @@ aws ssm put-parameter \
 
 #### Build and run the service
 
+This application uses the default credential and configuration resolution rules for any AWS SDK application. 
+
 ```sh
 go get github.com/gotopple/go-examples/go-service-config-with-ssm
 $GOPATH/bin/go-service-config-with-ssm -config-path /topple-example/component/2018-08-25.1/
