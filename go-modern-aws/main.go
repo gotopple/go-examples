@@ -33,6 +33,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm"
 )
 
+const authMetadata = `example-service-envelope`
+
 func main() {
 	// Load runtime configuration
 	c := loadConfig()
@@ -58,22 +60,38 @@ func main() {
 			return
 		}
 
-		block, err := aes.NewCipher(key)
-		if err != nil {
-			log.Fatal(err)
-		}
-
+		// Generate a random 12 byte nonce
 		nonce := make([]byte, 12)
 		if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-			panic(err.Error())
+			// If we couldn't read 12 bytes from crypto/rand
+			log.Printf("500 %s\n", err)
+			w.WriteHeader(500)
+			return
 		}
 
-		aesgcm, err := cipher.NewGCM(block)
+		// Initialize a new block cipher using the secret key from internal state
+		block, err := aes.NewCipher(key)
+		// Handle cases where the key is not appropriate for AES256 block ciphers
 		if err != nil {
-			panic(err.Error())
+			log.Printf("500 %s\n", err)
+			w.WriteHeader(500)
+			return
 		}
 
+		// Get an authenticated encryption with associated data cipher. In this
+		// case Galois Counter Mode.
+		aesgcm, err := cipher.NewGCM(block)
+		// Handle cases where the block is not compatible with GCM
+		if err != nil {
+			log.Printf("500 %s\n", err)
+			w.WriteHeader(500)
+			return
+		}
+
+		// Seal the plaintext
 		ciphertext := aesgcm.Seal(nil, nonce, plaintext.Bytes(), nil)
+
+		// Everything worked, form the envelope and return it to the caller.
 		fmt.Fprintf(w, "%x:%x", ciphertext, nonce)
 	})
 
@@ -83,36 +101,64 @@ func main() {
 		// A real implementation should check request Content-Length, validate
 		// input size limits, and then only process that much data.
 		_, err := io.Copy(&envelope, r.Body)
+		// Lots of things could go wrong during input to memory copy, but we're
+		// going to assume that it is always due to bad client behavior. #example
 		if err != nil {
-			panic(err.Error())
+			log.Printf("400 %s\n", err)
+			w.WriteHeader(400)
+			return
 		}
 
+		// Make sure that the input envelope has the correct structure
 		parts := strings.Split(envelope.String(), `:`)
+		// Handle envelopes that do not have exactly two parts
 		if len(parts) != 2 {
-			panic(`invalid input envelope`)
+			log.Printf("400 invalid input envelope: %s parts\n", len(parts))
+			w.WriteHeader(400)
+			return
 		}
 
+		// Decode the base 64 parts
 		ciphertext, err := hex.DecodeString(parts[0])
 		nonce, err := hex.DecodeString(parts[1])
+		// Handle parts that cannot be decoded
 		if err != nil {
-			panic(`invalid input envelope`)
+			log.Printf("400 invalid input envelope: %s\n", err)
+			w.WriteHeader(400)
+			return
 		}
 
+		// Initialize a new block cipher using the secret key from internal state
 		block, err := aes.NewCipher(key)
+		// Handle cases where the key is not appropriate for AES256 block ciphers
 		if err != nil {
-			panic(err.Error())
+			log.Printf("500 %s\n", err)
+			w.WriteHeader(500)
+			return
 		}
 
+		// Get an authenticated encryption with associated data cipher. In this
+		// case Galois Counter Mode.
 		aesgcm, err := cipher.NewGCM(block)
+		// Handle cases where the block is not compatible with GCM
 		if err != nil {
-			panic(err.Error())
+			log.Printf("500 %s\n", err)
+			w.WriteHeader(500)
+			return
 		}
 
-		plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+		// Decrypt, verify, and authenticate the envelope.
+		plaintext, err := aesgcm.Open(nil, nonce, ciphertext, authMetadata)
+		// If the ciphertext was encrypted by a different key, or the nonce is 
+		// incorrect for the encrypted data, or the envelope fails the 
+		// authentication check. The input is bad.
 		if err != nil {
-			panic(err.Error())
+			log.Printf("400 %s\n", err)
+			w.WriteHeader(400)
+			return
 		}
 
+		// Everything worked, return the plaintext.
 		fmt.Fprintf(w, "%s\n", plaintext)
 	})
 
