@@ -172,4 +172,16 @@ curl -s --data "Hello SSM" http://localhost:8080/seal
 curl -s --data "<PASTE THE OUTPUT FROM THE SEAL COMMAND>" http://localhost:8080/unseal
 ```
 
+## References
+
+* [AWS SDK for Go](https://docs.aws.amazon.com/sdk-for-go/api/)
+* [AWS SDK for Go GoDoc](https://godoc.org/github.com/aws/aws-sdk-go)
+* [AWS SSM Parameter Store User Guide](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-paramstore.html)
+* [Parameter Hierarchies](https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-organize.html)
+* [Tagging Parameters](https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-tag.html)
+* [Labeling Parameters](https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html)
+* [The Right Way to Store Secrets](https://aws.amazon.com/blogs/mt/the-right-way-to-store-secrets-using-parameter-store/)
+* [You Should Use SSM Parameter Store over Lambda ENV Variables](https://hackernoon.com/you-should-use-ssm-parameter-store-over-lambda-env-variables-5197fc6ea45b)
+
+
 
