@@ -146,7 +146,11 @@ aws ssm put-parameter \
 
 #### Build and run the service
 
-This application uses the default credential and configuration resolution rules for any AWS SDK application. 
+*Note:* Building the example requires that you have the Go toolchain installed and a workspace configured in the normal fashion.
+
+*Note:* This application uses the default credential and configuration resolution rules for any AWS SDK application. 
+
+The following two commands will fetch, build, and execute the application. It will use your environment's AWS credentials and configuration to communicate with SSM and offer a service endpoint at http://localhost:8080.
 
 ```sh
 go get github.com/gotopple/go-examples/go-service-config-with-ssm
