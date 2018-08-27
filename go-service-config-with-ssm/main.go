@@ -149,8 +149,8 @@ func main() {
 
 		// Decrypt, verify, and authenticate the envelope.
 		plaintext, err := aesgcm.Open(nil, nonce, ciphertext, []byte(authMetadata))
-		// If the ciphertext was encrypted by a different key, or the nonce is 
-		// incorrect for the encrypted data, or the envelope fails the 
+		// If the ciphertext was encrypted by a different key, or the nonce is
+		// incorrect for the encrypted data, or the envelope fails the
 		// authentication check. The input is bad.
 		if err != nil {
 			log.Printf("400 %s\n", err)
@@ -183,7 +183,7 @@ var (
 	// This application loads and indexes SSM parameters relative to a path.
 	iRecursive = true
 	// This application requires access to secret data.
-	iDecrypt   = true
+	iDecrypt = true
 )
 
 // loadConfig() parses command line flags, enforces input requirements, scrubs
