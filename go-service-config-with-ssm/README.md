@@ -94,6 +94,8 @@ Parameter names do have some constraints documented [here](https://docs.aws.amaz
 * A parameter name can't include spaces.
 * Parameter hierarchies are limited to a maximum depth of fifteen levels.
 
+Parameter values are represented as strings in SSM and can be between 1 and 4096 characters. See [PutParameter](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PutParameter.html#systemsmanager-PutParameter-request-Value) for more information. If storing interpreted structures like JSON or other documents in a single parameter use base64 encoding.
+
 ### Secrets in Configuration
 
 Each SSM parameter has an associated data type. The type can be `String`, `StringList`, or `SecureString`. SSM will use KMS to encrypt and decrypt any parameters with the `SecureString` type. SSM will attempt to use the default KMS key for the account the calling IAM actor is associated with. The example in this project will always use the default key. However, your implementation can use other KMS keys by referencing the key ID when creating and retrieving the parameter data from SSM.
