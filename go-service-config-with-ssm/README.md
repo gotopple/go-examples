@@ -4,7 +4,7 @@ This example program demonstrates loading configuration and secret material from
 
 ## On Modern Configuration and Secret Management in AWS
 
-The enclosed application demonstrates the use of SSM parameters for retrieving secret and other sensitive application cofiguration.  SSM is an ideal application configuration storage and last mile delivery solution. It provides:
+The enclosed application demonstrates the use of SSM parameters for retrieving secret and other sensitive application configuration.  SSM is an ideal application configuration storage and last mile delivery solution. It provides:
 
 * First-class API management of key-value data
 * Support for both clear String and SecureString types where data is protected transparently by AWS Key Management Service
@@ -102,7 +102,7 @@ Each SSM parameter has an associated data type. The type can be `String`, `Strin
 
 ### Secret Handling Best Practices
 
-Secrets should never be written to disk in plaintext. The example included in this repo loads configuration directly from SSM when it starts and never writes that configuration to disk. Other configuration management systems or tooling might use a database to store configuration working sets. Then later realize that configuration before runtime by writing files into a file in an EC2 instance, or into EC2 instance metadata (user data), or by baking it into an AMI or Docker image so that it is available to the software at launch. Those are all bad patterns for any system that handles sensitive and secret data. Strategies that ship configuration data with software deployment artifacts leak that data as those distribution channels often apply very coarse access control mechanisms. Strategies that stage files on an instance or make the data available via EC2 metadata risk leaking secrets to unauthorized processes on the same machine or to other non-root users. 
+Secrets should never be written to disk in plaintext. The example included in this repository loads configuration directly from SSM when it starts and never writes that configuration to disk. Other configuration management systems or tooling might use a database to store configuration working sets. Then later realize that configuration before runtime by writing files into a file in an EC2 instance, or into EC2 instance metadata (user data), or by baking it into an AMI or Docker image so that it is available to the software at launch. Those are all bad patterns for any system that handles sensitive and secret data. Strategies that ship configuration data with software deployment artifacts leak that data as those distribution channels often apply very coarse access control mechanisms. Strategies that stage files on an instance or make the data available via EC2 metadata risk leaking secrets to unauthorized processes on the same machine or to other non-root users. 
 
 By keeping secret material plaintext limited to the process memory you can be certain that the only way to expose the secret is by an attacker breaching the memory access boundaries provided by the operating system on the machine. Those attacks are possible in some cases, however they do require a more sophisticated attacker.
 
@@ -117,6 +117,8 @@ This example is a simple AES256 encryption service that exposes two endpoints, `
 ## Running the Example
 
 #### Initialize the configuration in SSM
+
+*Note*: If you are using the AWS CLI to add a parameter that will contain a URL then you should consider adding `cli_follow_urlparam = false` to your `.aws/config` file. By default the AWS CLI will attempt to resolve the content at the specified URL and use that content as the value. This is general AWS CLI behavior and not specific to SSM parameters. 
 
 ```sh
 # Generate and write a secure AES256 key into a SecureString SSM parameter.
